@@ -93,10 +93,22 @@ def main():
     st.markdown("               ")
     st.markdown("               ")
 
-    uploaded = st.sidebar.file_uploader('#### 選擇您要上傳的 CSV 檔', type="csv")
+    uploaded = st.sidebar.file_uploader('#### 選擇您要上傳的 CSV 檔', type=["csv", "txt", "xlsx"])
     
     if uploaded is not None:
-        df_raw = pd.read_csv(uploaded, encoding="utf-8")
+        sub_name = uploaded.name.split(".")[1]
+        if sub_name == "csv" or sub_name=="txt":
+
+        # st.markdown(uploaded)
+            df_raw = pd.read_csv(uploaded, skiprows=15, sep="\s+|\t+", encoding="utf-8")
+        elif sub_name == "xlsx":
+            xl = pd.ExcelFile(uploaded)
+            aa = xl.sheet_names
+            aa
+            # df_raw = pd.read_excel(uploaded)
+            # df_raw
+        # df_raw.dtypes
+        # df_raw
         st.header('您所上傳的檔案內容：')
 
     # else:
