@@ -103,9 +103,15 @@ def main():
             df_raw = pd.read_csv(uploaded, skiprows=15, sep="\s+|\t+", encoding="utf-8")
         elif sub_name == "xlsx":
             xl = pd.ExcelFile(uploaded)
-            aa = xl.sheet_names
-            aa
-            # df_raw = pd.read_excel(uploaded)
+            sheet = xl.sheet_names
+            sk_row = 9
+            df_raw = pd.DataFrame()
+            df_raw["Time"] = pd.read_excel(uploaded, skiprows=sk_row, usecols="A")
+            for i in sheet:
+                df_tmp = pd.read_excel(uploaded, sheet_name=i, skiprows=sk_row, usecols="B")
+                df_raw[i] = df_tmp * 1000000
+            # aa = df_raw.shape
+            # aa
             # df_raw
         # df_raw.dtypes
         # df_raw
