@@ -73,9 +73,7 @@ def backend_cal(df_cal, para_dict):
         x_name = df_prin.columns[1+(i-1)*2]
         y_name = df_prin.columns[2+(i-1)*2]
 
-        fig_sta.add_trace(go.Scatter(x=df_prin[x_name], y=df_prin[y_name], mode="markers", name=x_name))
-
-
+        # fig_sta.add_trace(go.Scatter(x=df_prin[x_name], y=df_prin[y_name], mode="markers", name=x_name))
 
 
     df_diff = df_prin.diff()
@@ -83,7 +81,23 @@ def backend_cal(df_cal, para_dict):
     df_rate = df_diff/time_diff
     df_rate["Time"] = df_prin["Time"]
     df_rate.fillna(0, inplace=True)
+    # st.markdown("ABCABC")
     # df_rate
+    # size =  df_rate.shape
+    # size
+
+    prin_corner_num = int(df_prin.shape[1])
+    df_prin_rate = pd.DataFrame()
+    fig_prin_rate = go.Figure()
+    for j in range (1, prin_corner_num):
+        # j
+        co_name = df_rate.columns[j]
+        
+        df_prin_rate[co_name+"_rate"] = abs(df_rate[co_name])
+        df_prin_rate[co_name+"_prin"] = abs(df_prin[co_name])
+        
+        fig_prin_rate.add_trace(go.Scatter(x=abs(df_rate[co_name]), y=abs(df_prin[co_name]), mode="markers", name=co_name))
+
 
     fig_rate = px.line(df_rate, x='Time', y=df_rate.columns,
                         color_discrete_sequence=color_sequence, template=template, 
@@ -93,7 +107,7 @@ def backend_cal(df_cal, para_dict):
                         color_discrete_sequence=color_sequence, template=template, 
                         )
         # fig_srs.update_yaxes(title_font_family="Arial")
-    return df_prin, df_rate, fig_prin, fig_rate, fig_sta
+    return df_prin, df_rate, df_prin_rate, fig_prin, fig_rate, fig_sta, fig_prin_rate
 
 def main():
 
@@ -176,7 +190,7 @@ def main():
     df_cal.columns = range(0, df_raw.shape[1])
     date = str(dt.datetime.now()).split(" ")[0]
 
-    df_prin, df_rate, fig_prin, fig_rate, fig_sta = backend_cal(df_cal, para_dict)
+    df_prin, df_rate, df_prin_rate, fig_prin, fig_rate, fig_sta, fig_prin_rate = backend_cal(df_cal, para_dict)
 
 
     if show_prin == True:
@@ -205,23 +219,33 @@ def main():
     if show_rate == True:
 
         st.subheader('Principal Strain Rate：')
-        df_rate
+        df_prin_rate
 
         st.subheader('Principal Strain Rate Profile：')
-        st.plotly_chart(fig_rate, use_container_width=True)
+        # st.plotly_chart(fig_rate, use_container_width=True)
+        st.plotly_chart(fig_prin_rate, use_container_width=True)
 
         st.subheader('Principal Strain Rate Summary：')
         rate_summary = df_rate.describe()
         rate_summary
 
-        prin_rate = convert_df(df_rate)
+        prin_rate = convert_df(df_prin_rate)
         rate_file_name_csv = date + "_strain_rate.csv"
 
-        st.download_button(label='Download principal result as CSV',  
+        st.download_button(label='Download principal vs rate result as CSV',  
                             data=prin_rate, 
                             file_name=rate_file_name_csv,
                             mime='text/csv',
                             key="rate_csv")
+        
+        rate_time = convert_df(df_rate)
+        rate_file_name_csv = date + "_time_rate.csv"
+
+        st.download_button(label='Download rate vs time result as CSV',  
+                            data=rate_time, 
+                            file_name=rate_file_name_csv,
+                            mime='text/csv',
+                            key="time_rate_csv")
     
     if show_state == True:
         st.subheader('Principal Strain State:')
